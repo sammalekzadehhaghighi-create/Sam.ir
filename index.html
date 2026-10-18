@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>سازنده دکمه روی عکس</title>
+<style>
+  body { font-family: Tahoma, sans-serif; background-color: #f0f0f0; padding: 20px; margin: 0; }
+  .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+  .header-banner { background-color: #2c3e50; color: white; text-align: center; padding: 15px; border-radius: 8px; margin-bottom: 25px; }
+  .header-banner h2 { margin: 0 0 5px 0; font-size: 20px; }
+  .header-banner p { margin: 0; font-size: 14px; opacity: 0.8; }
+  h3 { font-size: 18px; color: #222; margin-top: 20px; margin-bottom: 10px; }
+  .file-input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; background: #fafafa; }
+  #preview-area { position: relative; display: block; border: 2px dashed #ccc; min-height: 200px; border-radius: 8px; margin-top: 10px; background-color: #f9f9f9; text-align: center; cursor: crosshair; }
+  #preview-area img { max-width: 100%; display: block; margin: 0 auto; border-radius: 8px; }
+  .placeholder-text { color: #888; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none; }
+  .hotspot { position: absolute; border: 2px solid #3498db; background: rgba(52,152,219,0.3); cursor: pointer; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; text-shadow: 1px 1px 2px #000; box-sizing: border-box; }
+  .hotspot:hover { background: rgba(52,152,219,0.5); }
+  .settings-panel { margin-top: 20px; padding: 20px; background: #f9f9f9; border-radius: 8px; border: 1px solid #eee; }
+  .settings-panel h4 { margin-top: 0; font-size: 16px; color: #333; }
+  .form-group { display: flex; align-items: center; margin-bottom: 12px; }
+  .form-group label { width: 120px; font-size: 14px; color: #444; }
+  .form-group input[type="text"], .form-group select { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-family: inherit; }
+  .form-group input[type="color"] { width: 50px; height: 35px; padding: 0; border: none; cursor: pointer; }
+  .btn-group { display: flex; gap: 10px; margin-top: 15px; }
+  button { cursor: pointer; border: none; border-radius: 6px; font-family: inherit; padding: 10px 15px; font-size: 14px; font-weight: bold; transition: opacity 0.2s; }
+  button:hover { opacity: 0.9; }
+  .btn-save { background: #3498db; color: white; flex: 1; }
+  .btn-delete { background: #e74c3c; color: white; flex: 1; }
+  .btn-generate { background: #3498db; color: white; width: 100%; margin-top: 10px; font-size: 16px; }
+  .btn-copy { background: #ecf0f1; color: #333; width: 100%; border: 1px solid #ccc; margin-top: 10px; }
+  #output-code { width: 100%; height: 200px; margin-top: 15px; font-family: monospace; direction: ltr; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 6px; background: #fafafa; resize: vertical; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header-banner">
+    <h2>محمد سام ملک‌زاده</h2>
+    <p>مدیریت محمد سام ملک‌زاده</p>
+  </div>
+  <h3>۱. عکس را آپلود کنید</h3>
+  <input type="file" id="imgUpload" class="file-input" accept="image/*">
+  <h3>۲. روی عکس کلیک کنید تا دکمه بسازید</h3>
+  <div id="preview-area">
+    <span class="placeholder-text">اینجا عکس شما نمایش داده می‌شود</span>
+  </div>
+  <div class="settings-panel" id="editor" style="display:none;">
+    <h4>تنظیمات دکمه انتخاب‌شده</h4>
+    <div class="form-group">
+      <label>متن دکمه:</label>
+      <input type="text" id="btnText" placeholder="مثلاً خرید">
+    </div>
+    <div class="form-group">
+      <label>رنگ پس‌زمینه:</label>
+      <input type="color" id="btnColor" value="#3498db">
+    </div>
+    <div class="form-group">
+      <label>رنگ متن:</label>
+      <input type="color" id="btnTextColor" value="#ffffff">
+    </div>
+    <div class="form-group">
+      <label>رفتار:</label>
+      <select id="btnAction">
+        <option value="alert">نمایش پیام</option>
+        <option value="link">باز کردن لینک در تب جدید</option>
+        <option value="color">تغییر رنگ خود دکمه</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>مقدار (پیام یا لینک):</label>
+      <input type="text" id="btnValue" placeholder="https://example.com">
+    </div>
+    <div class="btn-group">
+      <button class="btn-save" onclick="saveButton()">ذخیره دکمه</button>
+      <button class="btn-delete" onclick="deleteButton()">حذف دکمه</button>
+    </div>
+  </div>
+  <h3>۳. کد نهایی را دریافت کنید</h3>
+  <button class="btn-generate" onclick="generateCode()">تولید کد</button>
+  <textarea id="output-code" readonly></textarea>
+  <button class="btn-copy" onclick="copyCode()">کپی کد</button>
+</div>
+<script>
+let buttons = [];
+let selectedIndex = -1;
+let imgSrc = '';
+const previewArea = document.getElementById('preview-area');
+const editor = document.getElementById('editor');
+const fileInput = document.getElementById('imgUpload');
+fileInput.addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    imgSrc = ev.target.result;
+    previewArea.innerHTML = `<img src="${imgSrc}" id="main-image">`;
+    buttons = [];
+    selectedIndex = -1;
+    editor.style.display = 'none';
+    renderHotspots();
+  };
+  reader.readAsDataURL(file);
+});
+previewArea.addEventListener('click', e => {
+  const img = document.getElementById('main-image');
+  if (!img) return;
+  if (e.target.tagName === 'IMG' || e.target === previewArea) {
+    const rect = img.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    buttons.push({ x, y, w: 25, h: 10, text: 'دکمه جدید', bg: '#3498db', color: '#fff', action: 'alert', value: 'سلام!' });
+    selectedIndex = buttons.length - 1;
+    loadEditor();
+    renderHotspots();
+  }
+});
+function renderHotspots() {
+  previewArea.querySelectorAll('.hotspot').forEach(el => el.remove());
+  const img = document.getElementById('main-image');
+  if (!img) return;
+  buttons.forEach((b, i) => {
+    const div = document.createElement('div');
+    div.className = 'hotspot';
+    div.style.left = b.x + '%';
+    div.style.top = b.y + '%';
+    div.style.width = b.w + '%';
+    div.style.height = b.h + '%';
+    div.style.backgroundColor = b.bg;
+    div.style.color = b.color;
+    div.textContent = b.text;
+    if (i === selectedIndex) { div.style.border = '3px solid #e74c3c'; }
+    div.onclick = (ev) => { ev.stopPropagation(); selectedIndex = i; loadEditor(); renderHotspots(); };
+    previewArea.appendChild(div);
+  });
+}
+function loadEditor() {
+  const b = buttons[selectedIndex];
+  if (!b) return;
+  editor.style.display = 'block';
+  document.getElementById('btnText').value = b.text;
+  document.getElementById('btnColor').value = b.bg;
+  document.getElementById('btnTextColor').value = b.color;
+  document.getElementById('btnAction').value = b.action;
+  document.getElementById('btnValue').value = b.value;
+}
+function saveButton() {
+  const b = buttons[selectedIndex];
+  if (!b) return;
+  b.text = document.getElementById('btnText').value;
+  b.bg = document.getElementById('btnColor').value;
+  b.color = document.getElementById('btnTextColor').value;
+  b.action = document.getElementById('btnAction').value;
+  b.value = document.getElementById('btnValue').value;
+  renderHotspots();
+}
+function deleteButton() {
+  if (selectedIndex < 0) return;
+  buttons.splice(selectedIndex, 1);
+  selectedIndex = -1;
+  editor.style.display = 'none';
+  renderHotspots();
+}
+function generateCode() {
+  const finalHtml = `<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<style>
+  .image-container { position: relative; display: inline-block; max-width: 100%; }
+  .image-container img { max-width: 100%; display: block; }
+  .custom-button { position: absolute; border: none; border-radius: 5px; cursor: pointer; font-family: inherit; font-weight: bold; display: flex; align-items: center; justify-content: center; transition: opacity 0.2s; }
+  .custom-button:hover { opacity: 0.8; }
+</style>
+</head>
+<body>
+<div class="image-container">
+  <img src="${imgSrc}" alt="تصویر">
+  ${buttons.map(b => {
+    let onclick = '';
+    if (b.action === 'alert') { onclick = `alert('${b.value.replace(/'/g, "\\'")}')`; } 
+    else if (b.action === 'link') { onclick = `window.open('${b.value}','_blank')`; } 
+    else if (b.action === 'color') { onclick = `this.style.backgroundColor = '${b.value || '#e74c3c'}'`; }
+    return `<button class="custom-button" style="left:${b.x}%; top:${b.y}%; width:${b.w}%; height:${b.h}%; background-color:${b.bg}; color:${b.color};" onclick="${onclick}">${b.text}</button>`;
+  }).join('\n  ')}
+</div>
+</body>
+</html>`;
+  document.getElementById('output-code').value = finalHtml;
+}
+function copyCode() {
+  const ta = document.getElementById('output-code');
+  if(!ta.value) return alert('ابتدا دکمه تولید کد را بزنید.');
+  ta.select();
+  document.execCommand('copy');
+  alert('کد با موفقیت کپی شد!');
+}
+</script>
+</body>
+  </html>
